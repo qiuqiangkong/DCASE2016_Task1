@@ -1,5 +1,9 @@
 2016.05.29
+Pre-requiste:
+librosa
+Hat (https://github.com/qiuqiangkong/Hat)
+
 Usage:
 1.run prepareData.py to calculate features
-2.run main_dnn.py to train model
+2.run main_dnn.py to train model (you should modify the Hat path in this file)
 3.run recognize.py to evaluate
