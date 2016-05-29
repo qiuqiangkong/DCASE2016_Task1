@@ -126,6 +126,15 @@ def Recognize( f_predict, teDict, n_out, scaler=None ):
     acc = np.sum( np.diag( np.diag( confM ) ) ) / np.sum( confM )
     acc_fr = np.mean( acc_frs )
     return acc, acc_fr, confM
+    
+# create an empty folder
+def CreateFolder( fd ):
+    if not os.path.exists(fd):
+        os.makedirs(fd)
         
 if __name__ == "__main__":
+    CreateFolder('Fe')
+    CreateFolder('Fe/Mel')
+    CreateFolder('Results')
+    CreateFolder('Md')
     GetMel( cfg.wav_fd, cfg.fe_mel_fd )
