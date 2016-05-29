@@ -1,0 +1,5 @@
+2016.05.29
+Usage:
+1.run prepareData.py to calculate features
+2.run main_dnn.py to train model
+3.run recognize.py to evaluate
