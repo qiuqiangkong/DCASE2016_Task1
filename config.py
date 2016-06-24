@@ -5,12 +5,20 @@ Created:  2016.05.11
 Modified: -
 --------------------------------------
 '''
+
 wav_fd = '/homes/qkong/datasets/DCASE2016/Scene Classification/TUT-acoustic-scenes-2016-development/audio'
 fe_mel_fd = 'Fe/Mel'
 fe_fft_fd = 'Fe/Fft'
 fe_mel3d_fd = 'Fe/Mel3d'
 fe_texture3d0_fd = 'Fe/Texture3d0'
 fe_texture3d90_fd = 'Fe/Texture3d90'
+fe_sp_stat_fd = 'Fe/SpStat'
+fe_sp_stat2_fd = 'Fe/SpStat2'
+
+wav_eva_fd = '/homes/qkong/datasets/DCASE2016/Scene Classification/TUT-acoustic-scenes-2016-evaluation/audio'
+fe_mel_eva_fd = 'Fe_eva/Mel'
+meta_csv = '/homes/qkong/datasets/DCASE2016/Scene Classification/TUT-acoustic-scenes-2016-development/meta.txt'
+txt_eva_path = '/homes/qkong/datasets/DCASE2016/Scene Classification/TUT-acoustic-scenes-2016-evaluation/evaluation_setup/test.txt'
 
 csv_fd = '/homes/qkong/datasets/DCASE2016/Scene Classification/TUT-acoustic-scenes-2016-development/evaluation_setup'
 tr_csv = [ csv_fd+'/fold1_train.txt', csv_fd+'/fold2_train.txt', csv_fd+'/fold3_train.txt', csv_fd+'/fold4_train.txt' ]

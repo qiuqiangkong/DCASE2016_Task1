@@ -19,8 +19,9 @@ import librosa
 import config as cfg
 import csv
 import scipy.stats
-from co_occurrence import *
+import co_occurrence as co
 from Hat.preprocessing import mat_2d_to_3d
+import stats
 
 ### calculate features
 # extract mel feature
@@ -82,7 +83,121 @@ def GetBankSpectrogram( wav_fd, fe_fd, banks=None, n_delete=0 ):
         out_path = fe_fd + '/' + na[0:-4] + '.f'
         cPickle.dump( X, open(out_path, 'wb'), protocol=cPickle.HIGHEST_PROTOCOL )
         
+        
 ###
+
+
+def GetBlockStat( X ):
+    X = np.log( X )     # map to log scale
+
+    # get distribution of data
+    edges = np.arange(-15,5,0.3)
+    hist, _ = np.histogram( X, edges )
+    hist = hist.astype( float )
+    p = hist / np.sum(hist)
+    
+    # get stats of distribution
+    mean_ = stats.mean( p )
+    var_ = stats.variance( p )
+    skew_ = stats.skewness( p )
+    kurt_ = stats.kurtosis( p )
+    energy_ = stats.energy( p )
+    entropy_ = stats.entropy( p )
+    
+    sts = [ mean_, var_, skew_, kurt_, energy_, entropy_ ]
+    return sts
+
+def GetCoMatrixStats( P ):
+    energy_ = co.energy( P )
+    mean_x_ = co.mean( P, 'row' )
+    mean_y_ = co.mean( P, 'col' )
+    var_x_ = co.variance( P, 'row' )
+    var_y_ = co.variance( P, 'col' )
+    correlation_ = co.correlation( P )
+    inertia_ = co.inertia( P )
+    absolute_value_ = co.absolute_value( P )
+    inverse_difference_ = co.inverse_difference( P )
+    entropy_ = co.entropy( P )
+    
+    return [ energy_, mean_x_, mean_y_, var_x_, var_y_, correlation_, inertia_, absolute_value_, inverse_difference_,  entropy_ ]
+
+def GetBlockStat2( X ):
+    X = np.log( X )     # map to log scale
+
+    # get distribution of data
+    bgn, fin, interval = -15, 5, 0.5
+    sts = []
+    
+    M, P = co.co_occurrence_matrix( X, bgn, fin, interval, theta='0' )
+    sts += GetCoMatrixStats( P )
+    
+    M, P = co.co_occurrence_matrix( X, bgn, fin, interval, theta='90' )
+    sts += GetCoMatrixStats( P )
+    
+    return sts
+
+
+# eg. size of input X is 10*513
+def GetSliceStat( X, order ):
+    edges = [ [0, 100], [50, 150], [100, 200], [150, 250], [200, 300], [250, 350], [300, 400], [350, 450], [400, 500]  ]
+    sts = []
+    for n in xrange(len(edges)):
+        block = X[ :, edges[n][0]:edges[n][1] ]
+        if order==1:
+            sts += GetBlockStat( block )
+        if order==2:
+            sts += GetBlockStat2( block )
+    return sts
+    
+        
+def GetSpectrogramStat( sp_fe_fd, out_fe_fd, agg_num, hop, order ):
+    n_block = 3
+    names = [ na for na in os.listdir(sp_fe_fd) ]
+    names = sorted(names)
+    cnt = 0
+    for na in names:
+        print cnt, na
+        X = cPickle.load( open( sp_fe_fd+'/'+na, 'rb' ) )
+        (N, n_in) = X.shape
+
+        pt = 0
+        Sts = []
+        while (pt + agg_num) < N:
+            Xslice = X[pt:pt+agg_num]
+            sts = GetSliceStat( Xslice, order )
+            Sts.append( sts )
+            pt += hop
+        Sts = np.array( Sts )
+        
+        out_path = out_fe_fd + '/' + na[0:-2] + '.f'
+        cPickle.dump( Sts, open(out_path, 'wb'), protocol=cPickle.HIGHEST_PROTOCOL )
+        cnt += 1
+
+###
+
+def GetDictData0( fe_fd, csv_file ):
+    # read csv
+    with open( csv_file, 'rb') as f:
+        reader = csv.reader(f)
+        lis = list(reader)
+    
+    # init Dict
+    Dict = {}
+    for e in cfg.labels:
+        Dict[e] = []
+        
+    # Add feature to Dict
+    for li in lis:
+        [na, lb] = li[0].split('\t')
+        na = na.split('/')[1][0:-4]
+        path = fe_fd + '/' + na + '.f'
+        X = cPickle.load( open( path, 'rb' ) )
+        
+        # insert to Dict
+        Dict[lb].append( X )
+    
+    return Dict
+
 # Read all features to Dict    
 # the key of Dict is label, value is list of 3d (n_block, n_time, n_freq) audio features
 def GetDictData( fe_fd, csv_file, agg_num, hop ):
@@ -283,6 +398,8 @@ if __name__ == "__main__":
     CreateFolder('Fe')
     CreateFolder('Fe/Mel')
     CreateFolder('Fe/Fft')
+    CreateFolder('Fe/SpStat')
+    CreateFolder('Fe/SpStat2')
     CreateFolder('Fe/Mel3d')
     CreateFolder('Fe/Fft3d')
     CreateFolder('Fe/Texture3d0')
@@ -294,7 +411,9 @@ if __name__ == "__main__":
     GetMel( cfg.wav_fd, cfg.fe_mel_fd, n_delete=0 )
     
     # calculate bank feature
-    # GetBankSpectrogram( cfg.wav_fd, cfg.fe_fft_fd, banks=None, n_delete=0 )
+    #GetBankSpectrogram( cfg.wav_fd, cfg.fe_fft_fd, banks=None, n_delete=0 )
+    #GetSpectrogramStat( cfg.fe_fft_fd, cfg.fe_sp_stat_fd, agg_num=10, hop=10, order=1 )
+    #GetSpectrogramStat( cfg.fe_fft_fd, cfg.fe_sp_stat2_fd, agg_num=10, hop=10, order=2 )
 
     '''
     # calculate texture feature

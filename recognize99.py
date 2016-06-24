@@ -22,6 +22,7 @@ import Hat.backend as K
 import config as cfg
 import prepareData as ppData
 import csv
+import matplotlib.pyplot as plt
 import cPickle
 np.set_printoptions(threshold=np.nan, linewidth=1000, precision=2, suppress=True)
 
@@ -35,7 +36,8 @@ n_labels = len( cfg.labels )
 
 
 # load model
-md = pickle.load( open( 'Md/md210.p', 'rb' ) )
+md = pickle.load( open( 'Md/md400.p', 'rb' ) )
+scalar = pickle.load( open( 'Results/scalar.p', 'rb' ) )
 
 # do recognize and evaluation
 n_labels = len( cfg.labels )
@@ -52,7 +54,12 @@ for li in lis:
     na = na.split('/')[1][0:-4]
     path = fe_fd + '/' + na + '.f'
     X = cPickle.load( open( path, 'rb' ) )
+    
+    
     X = mat_2d_to_3d( X, agg_num, hop )
+    X = X.reshape( X.shape[0], X.shape[1]*X.shape[2] )
+    X = scalar.transform( X )
+    
 
     # predict
     p_y_preds = md.predict(X)        # probability, size: (n_block,label)
@@ -63,6 +70,17 @@ for li in lis:
     confM[ id, pred ] += 1            
     corr_fr = list(preds).count(id)     # correct frames
     acc_frs += [ float(corr_fr) / X.shape[0] ]   # frame accuracy
+    
+    if lb=='residential_area':
+        print na
+    
+    '''
+    if lb=='park':
+        print id, pred
+        print na
+        cPickle.dump( p_y_preds, open( 'Results/p_y_preds.p', 'wb' ), protocol=cPickle.HIGHEST_PROTOCOL )
+        raw_input()
+    '''
         
 acc = np.sum( np.diag( np.diag( confM ) ) ) / np.sum( confM )
 acc_fr = np.mean( acc_frs )

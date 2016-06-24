@@ -22,6 +22,8 @@ Notes:
            using dropout 30 min ew: 76%, train 6h ew: 81%
 2016.05.29 Using Hat. Write main_dnn.py, main_lstm.py, main_cnn_lstm_dnn.py, main_dnn_hierarchy.py for Yong Xu
 2016.06.07 Try texture feature
+2016.06.24 Using Mel40 + DNN, batch_size=100, rmsprop_lr=1e-4. fold 1 acc=80%
+           classify on private dataset, prepare to submit results. 
 ====================================
 
 Results:

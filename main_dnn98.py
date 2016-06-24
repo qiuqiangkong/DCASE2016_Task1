@@ -1,13 +1,4 @@
-'''
-SUMMARY:  Dcase 2016 Task 1. Scene classification
-          Training time: 3 s/epoch. (Tesla M2090)
-          test acc: 78% +- ?, test frame acc: 64% +- ?  after 100 epoches     
-          fold, agg_num, hop, n_hid, act, optimizer can be tuned. 
-AUTHOR:   Qiuqiang Kong
-Created:  2016.05.11
-Modified: 2016.05.28
---------------------------------------
-'''
+
 import sys
 sys.path.append('/homes/qkong/my_code2015.5-/python/Hat')
 import pickle
@@ -27,10 +18,10 @@ import prepareData as ppData
 
 # hyper-params
 fe_fd = cfg.fe_mel_fd
-agg_num = 10        # concatenate frames
-hop = 10            # step_len
+agg_num = 100        # concatenate frames
+hop = 100            # step_len
 act = 'relu'
-n_hid = 500
+n_hid = 1000
 n_out = len( cfg.labels )
 fold = 0            # can be 0, 1, 2, 3
 
@@ -43,22 +34,24 @@ tr_y = sparse_to_categorical( tr_y, n_out )
 te_y = sparse_to_categorical( te_y, n_out )
 
 [batch_num, n_time, n_freq] = tr_X.shape
+tr_X = reshape_3d_to_4d( tr_X )
+te_X = reshape_3d_to_4d( te_X )
 print 'tr_X.shape:', tr_X.shape     # (batch_num, n_time, n_freq)
 print 'tr_y.shape:', tr_y.shape     # (batch_num, n_labels )
 
 
-# build model
+
 md = Sequential()
-md.add( InputLayer( (n_time, n_freq) ) )
-md.add( Flatten() )             # flatten to 2d: (n_time, n_freq) to 1d:(n_time*n_freq)
-md.add( Dropout( 0.1 ) )
-md.add( Dense( 500, act=act ) )
+md.add( InputLayer( (1, n_time, n_freq) ) )
+md.add( Convolution2D( n_outfmaps=8, n_row=5, n_col=5, act='relu') )
+md.add( MaxPool2D( pool_size=(3,3) ) )
+md.add( Convolution2D( n_outfmaps=32, n_row=5, n_col=5, act='relu') )
+md.add( MaxPool2D( pool_size=(3,3) ) )
+md.add( Flatten() )
 md.add( Dropout( 0.1 ) )
 md.add( Dense( 500, act=act) )
 md.add( Dropout( 0.1 ) )
-md.add( Dense( 500, act=act) )
-md.add( Dropout( 0.1 ) )
-md.add( Dense( n_out, act='softmax' ) )
+md.add( Dense( n_out, act='sigmoid' ) )
 md.summary()
 
 # callbacks
@@ -72,6 +65,6 @@ callbacks = [ validation, save_model ]
 optimizer = Rmsprop(1e-4)
 
 # fit model
-md.fit( x=tr_X, y=tr_y, batch_size=100, n_epoch=1000, loss_type='categorical_crossentropy', optimizer=optimizer, callbacks=callbacks )
+md.fit( x=tr_X, y=tr_y, batch_size=100, n_epoch=1000, loss_type='binary_crossentropy', optimizer=optimizer, callbacks=callbacks )
 
 # run recognize.py to get results. 

@@ -57,8 +57,13 @@ for li in lis:
     # predict
     p_y_preds = md.predict(X)        # probability, size: (n_block,label)
     preds = np.argmax( p_y_preds, axis=-1 )     # size: (n_block)
-    b = scipy.stats.mode(preds)
-    pred = int( b[0] )
+
+    #print preds
+    #pause
+
+    tmp = np.sum( p_y_preds, axis=0 )
+    pred = np.argmax( tmp )
+
     id = cfg.lb_to_id[lb]
     confM[ id, pred ] += 1            
     corr_fr = list(preds).count(id)     # correct frames
