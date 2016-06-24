@@ -1,10 +1,8 @@
 '''
-SUMMARY:  Dcase 2016 Task 1. Scene classification
+SUMMARY:  Train DNN model on private dataset
           Training time: 9 s/epoch. (Tesla M2090)
-          test acc: 80% +- ?, test frame acc: 64% +- ?  after 100 epoches on fold 1
 AUTHOR:   Qiuqiang Kong
-Created:  2016.05.11
-Modified: 2016.05.28
+Created:  2016.06.24
 --------------------------------------
 '''
 import sys
@@ -25,29 +23,25 @@ import config as cfg
 import prepareData as ppData
 
 # hyper-params
-fe_fd = cfg.fe_mel_fd
+fe_fd = cfg.fe_mel_fd   # use development data for training
 agg_num = 10        # concatenate frames
 hop = 10            # step_len
 act = 'relu'
 n_hid = 500
 n_out = len( cfg.labels )
-fold = 0            # can be 0, 1, 2, 3
 
 # prepare data
-tr_X, tr_y = ppData.GetAllData( fe_fd, cfg.tr_csv[fold], agg_num, hop )
-te_X, te_y = ppData.GetAllData( fe_fd, cfg.te_csv[fold], agg_num, hop )
+tr_X, tr_y = ppData.GetAllData( fe_fd, cfg.meta_csv, agg_num, hop )
 tr_y = sparse_to_categorical( tr_y, n_out )
-te_y = sparse_to_categorical( te_y, n_out )
 
 [batch_num, n_time, n_freq] = tr_X.shape
 print 'tr_X.shape:', tr_X.shape     # (batch_num, n_time, n_freq)
 print 'tr_y.shape:', tr_y.shape     # (batch_num, n_labels )
 
-
 # build model
 md = Sequential()
 md.add( InputLayer( (n_time, n_freq) ) )
-md.add( Flatten() )             # flatten to 2d: (n_time, n_freq) to 1d:(n_time*n_freq)
+md.add( Flatten() )
 md.add( Dropout( 0.1 ) )
 md.add( Dense( 500, act=act ) )
 md.add( Dropout( 0.1 ) )
@@ -59,15 +53,12 @@ md.add( Dense( n_out, act='softmax' ) )
 md.summary()
 
 # callbacks
-# tr_err, te_err are frame based. To get event based err, run recognize.py
-validation = Validation( tr_x=tr_X, tr_y=tr_y, va_x=None, va_y=None, te_x=te_X, te_y=te_y, call_freq=1, dump_path='Results/validation.p' )
-save_model = SaveModel( dump_fd='Md', call_freq=10 )
+validation = Validation( tr_x=tr_X, tr_y=tr_y, va_x=None, va_y=None, te_x=None, te_y=None, call_freq=1, dump_path='Results/validation.p' )
+save_model = SaveModel( dump_fd='Md_eva', call_freq=10 )
 callbacks = [ validation, save_model ]
 
 # optimizer
 optimizer = Rmsprop(1e-4)
 
 # fit model
-md.fit( x=tr_X, y=tr_y, batch_size=100, n_epoch=1000, loss_type='categorical_crossentropy', optimizer=optimizer, callbacks=callbacks )
-
-# run recognize.py to get results. 
+md.fit( x=tr_X, y=tr_y, batch_size=100, n_epoch=101, loss_type='categorical_crossentropy', optimizer=optimizer, callbacks=callbacks )

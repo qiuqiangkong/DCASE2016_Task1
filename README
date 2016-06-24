@@ -1,10 +1,27 @@
-2016.05.29
+2016.06.24
+This is sourcecode of DCASE Challenge 2016 Task 1. http://www.cs.tut.fi/sgn/arg/dcase2016/task-acoustic-scene-classification
+Using Mel + DNN achieve 77% average accuracy using 4 fold cross validation on development dataset. 
+
+THIS CODE IS BSD LISCENCED. YOU CAN USE AND MODIFY IT AS YOU WISH. 
+AUTHOR: QIUQIANG KONG, q.kong@surrey.ac.uk
+CVSSP, UNIVERSITY OF SURREY
+
+======================================
+
 Pre-requiste:
 librosa
 Hat (https://github.com/qiuqiangkong/Hat)
 
 Usage:
-1. modify the paths in config.py
-2. run prepareData.py to calculate features
-3. run main_dnn.py to train model (you should modify the Hat path in this file)
-4. run recognize.py to evaluate (you should modify the Hat path in this file)
+------ Preparation ------
+1. modify the paths of dataset in config.py, modify paths of HAT in every file. 
+
+------ Development Cross Validation ------
+1. run prepareData.py 		Calculate features for development data
+2. run main_dnn.py 		Train model on cross validation of development data
+3. run recognize.py 		Generate results and evaluate on cross validation data
+
+------ Generate Results of Private Data ------
+1. run prepareData_eva.py	Calculate features for evaluation data
+2. run main_dnn_eva.py		Train model on all development data
+3. run recognize_eva.py		Generate Results of private data

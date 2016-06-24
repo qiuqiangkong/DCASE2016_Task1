@@ -1,15 +1,16 @@
 '''
 SUMMARY:  Dcase 2016 Task 1. Scene classification
           Training time: 12 s/epoch. (Tesla M2090)
-          test acc: 70% +- ?, test frame acc: 56% +- ? after 10 epoches. 
+          test acc: 70% +- ?, test frame acc: 56% +- ? after 10 epoches on fold 1
           Try adjusting hyper-params, optimizer, longer epoches to get better results. 
 AUTHOR:   Qiuqiang Kong
 Created:  2016.05.11
 Modified: 2016.05.29
+          2016.06.24
 --------------------------------------
 '''
 import sys
-sys.path.append('../Hat')
+sys.path.append('/homes/qkong/my_code2015.5-/python/Hat')
 import pickle
 import numpy as np
 np.random.seed(1515)
@@ -31,12 +32,11 @@ agg_num = 10        # concatenate frames
 hop = 10            # step_len
 n_hid = 500
 n_out = len( cfg.labels )
+fold = 0            # can be 0, 1, 2, 3
 
 # prepare data
-trDict = ppData.GetDictData( fe_fd, cfg.tr_csv[0], agg_num, hop )
-teDict = ppData.GetDictData( fe_fd, cfg.te_csv[0], agg_num, hop )
-tr_X, tr_y, _ = ppData.DictToMat( trDict )
-te_X, te_y, _ = ppData.DictToMat( teDict )
+tr_X, tr_y = ppData.GetAllData( fe_fd, cfg.tr_csv[fold], agg_num, hop )
+te_X, te_y = ppData.GetAllData( fe_fd, cfg.te_csv[fold], agg_num, hop )
 tr_y = sparse_to_categorical( tr_y, n_out )
 te_y = sparse_to_categorical( te_y, n_out )
 
@@ -57,7 +57,7 @@ md.summary()
 # callbacks
 # tr_err, te_err are frame based. To get event based err, run recognize.py
 validation = Validation( tr_x=tr_X, tr_y=tr_y, va_x=None, va_y=None, te_x=te_X, te_y=te_y, call_freq=1, dump_path='Results/validation.p' )
-save_model = SaveModel( dump_fd='Md', call_freq=5 )
+save_model = SaveModel( dump_fd='Md', call_freq=10 )
 callbacks = [ validation, save_model ]
 
 # optimizer
