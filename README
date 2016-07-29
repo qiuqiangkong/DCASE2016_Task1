@@ -24,4 +24,4 @@ Usage:
 ------ Generate Results of Private Data ------
 1. run prepareData_eva.py	Calculate features for evaluation data
 2. run main_dnn_eva.py		Train model on all development data
-3. run recognize_eva.py		Generate Results of private data
+3. run recognize_eva.py		Generate Results of private data. Result is in 'Results_eva/task4_results.txt'

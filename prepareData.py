@@ -6,18 +6,25 @@ Modified: -
 --------------------------------------
 '''
 import sys
-sys.path.append('/homes/qkong/my_code2015.5-/python/Hat')
+sys.path.append('/user/HS229/qk00006/my_code2015.5-/python/Hat')
 import numpy as np
 from scipy import signal
 import cPickle
 import os
 import matplotlib.pyplot as plt
 from scipy import signal
-from scikits.audiolab import wavread
 import librosa
 import config as cfg
 import csv
+import wavio
 from Hat.preprocessing import mat_2d_to_3d
+
+### readwav
+def readwav( path ):
+    Struct = wavio.read( path )
+    wav = Struct.data.astype(float) / np.power(2, Struct.sampwidth*8-1)
+    fs = Struct.rate
+    return wav, fs
 
 ### calculate features
 # extract mel feature
@@ -28,7 +35,7 @@ def GetMel( wav_fd, fe_fd, n_delete ):
     for na in names:
         print na
         path = wav_fd + '/' + na
-        wav, fs, enc = wavread( path )
+        wav, fs = readwav( path )
         if ( wav.ndim==2 ): 
             wav = np.mean( wav, axis=-1 )
         assert fs==44100
