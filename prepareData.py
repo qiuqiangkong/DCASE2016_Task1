@@ -70,7 +70,10 @@ def Scaler( fe_fd, csv_file ):
     Xall = []
     for li in lis:
         # load data
-        [na, lb] = li[0].split('\t')
+        try:
+            [na, lb] = li[0].split('\t')
+        except:
+            na = li[0]
         na = na.split('/')[1][0:-4]
         path = fe_fd + '/' + na + '.f'
         X = cPickle.load( open( path, 'rb' ) )

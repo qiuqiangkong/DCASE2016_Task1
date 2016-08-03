@@ -32,6 +32,9 @@ n_labels = len( cfg.labels )
 # load model
 md = serializations.load( 'Md_eva/md20.p' )
 
+# get scaler
+scaler = ppData.Scaler( fe_fd, cfg.txt_eva_path )
+
 # load name of wavs to be classified
 with open( cfg.txt_eva_path, 'rb') as f:
     reader = csv.reader(f)
@@ -46,6 +49,7 @@ for li in lis:
     na = li[0][6:-4]
     fe_path = cfg.fe_mel_eva_fd + '/' + na + '.f'
     X = cPickle.load( open( fe_path, 'rb' ) )
+    X = scaler.transform( X )
     X = mat_2d_to_3d( X, agg_num, hop )
     
     # predict
