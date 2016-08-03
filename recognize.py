@@ -8,7 +8,7 @@ Modified: -
 --------------------------------------
 '''
 import sys
-sys.path.append('/homes/qkong/my_code2015.5-/python/Hat')
+sys.path.append('/user/HS229/qk00006/my_code2015.5-/python/Hat')
 import pickle
 import numpy as np
 np.random.seed(1515)
@@ -18,6 +18,7 @@ from Hat.layers.core import InputLayer, Flatten, Dense, Dropout
 from Hat.callbacks import SaveModel, Validation
 from Hat.preprocessing import sparse_to_categorical, mat_2d_to_3d
 from Hat.optimizers import Rmsprop
+from Hat import serializations
 import Hat.backend as K
 import config as cfg
 import prepareData as ppData
@@ -33,7 +34,10 @@ fold = 0
 n_labels = len( cfg.labels )
 
 # load model
-md = pickle.load( open( 'Md/md100.p', 'rb' ) )
+md = serializations.load( 'Md/md20.p' )
+
+# get scaler
+scaler = ppData.Scaler( fe_fd, cfg.tr_csv[fold] )
 
 # do recognize and evaluation
 n_labels = len( cfg.labels )
@@ -52,6 +56,7 @@ for li in lis:
     na = na.split('/')[1][0:-4]
     path = fe_fd + '/' + na + '.f'
     X = cPickle.load( open( path, 'rb' ) )
+    X = scaler.transform( X )
     X = mat_2d_to_3d( X, agg_num, hop )
 
     # predict
@@ -60,6 +65,7 @@ for li in lis:
     b = scipy.stats.mode(preds)
     pred = int( b[0] )
     id = cfg.lb_to_id[lb]
+    
     confM[ id, pred ] += 1            
     corr_fr = list(preds).count(id)     # correct frames
     acc_frs += [ float(corr_fr) / X.shape[0] ]   # frame accuracy

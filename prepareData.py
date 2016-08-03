@@ -60,7 +60,31 @@ def GetMel( wav_fd, fe_fd, n_delete ):
         out_path = fe_fd + '/' + na[0:-4] + '.f'
         cPickle.dump( X, open(out_path, 'wb'), protocol=cPickle.HIGHEST_PROTOCOL )
 
-def GetAllData( fe_fd, csv_file, agg_num, hop ):
+# Get Scaler from traing fold
+def Scaler( fe_fd, csv_file ):
+    # read csv
+    with open( csv_file, 'rb') as f:
+        reader = csv.reader(f)
+        lis = list(reader)
+    
+    Xall = []
+    for li in lis:
+        # load data
+        [na, lb] = li[0].split('\t')
+        na = na.split('/')[1][0:-4]
+        path = fe_fd + '/' + na + '.f'
+        X = cPickle.load( open( path, 'rb' ) )
+        
+        # reshape data to (n_block, n_time, n_freq)
+        Xall.append( X )
+    
+    Xall = np.concatenate( Xall, axis=0 )
+    from sklearn import preprocessing
+    scaler = preprocessing.StandardScaler().fit(Xall)
+    return scaler
+    
+# Load training fold or testing fold data and scaler them
+def GetAllData( fe_fd, csv_file, agg_num, hop, scaler ):
     # read csv
     with open( csv_file, 'rb') as f:
         reader = csv.reader(f)
@@ -76,6 +100,8 @@ def GetAllData( fe_fd, csv_file, agg_num, hop ):
         na = na.split('/')[1][0:-4]
         path = fe_fd + '/' + na + '.f'
         X = cPickle.load( open( path, 'rb' ) )
+        
+        X = scaler.transform( X )
         
         # reshape data to (n_block, n_time, n_freq)
         X3d = mat_2d_to_3d( X, agg_num, hop )

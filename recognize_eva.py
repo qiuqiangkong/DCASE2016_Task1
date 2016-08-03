@@ -6,7 +6,7 @@ Created:  2016.06.24
 --------------------------------------
 '''
 import sys
-sys.path.append('/homes/qkong/my_code2015.5-/python/Hat')
+sys.path.append('/user/HS229/qk00006/my_code2015.5-/python/Hat')
 import pickle
 import numpy as np
 np.random.seed(1515)
@@ -15,6 +15,7 @@ from Hat.models import Sequential
 from Hat.layers.core import InputLayer, Flatten, Dense, Dropout
 from Hat.callbacks import SaveModel, Validation
 from Hat.preprocessing import sparse_to_categorical, mat_2d_to_3d
+from Hat import serializations
 from Hat.optimizers import Rmsprop
 import Hat.backend as K
 import config as cfg
@@ -29,7 +30,7 @@ hop = 10
 n_labels = len( cfg.labels )
 
 # load model
-md = pickle.load( open( 'Md_eva/md100.p', 'rb' ) )
+md = serializations.load( 'Md_eva/md20.p' )
 
 # load name of wavs to be classified
 with open( cfg.txt_eva_path, 'rb') as f:

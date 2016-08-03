@@ -10,7 +10,7 @@ Modified: 2016.05.29
 --------------------------------------
 '''
 import sys
-sys.path.append('/homes/qkong/my_code2015.5-/python/Hat')
+sys.path.append('/user/HS229/qk00006/my_code2015.5-/python/Hat')
 import pickle
 import numpy as np
 np.random.seed(1515)
@@ -20,7 +20,8 @@ from Hat.layers.rnn import SimpleRnn, LSTM, GRU
 from Hat.layers.pool import GlobalMeanTimePool
 from Hat.callbacks import SaveModel, Validation
 from Hat.preprocessing import sparse_to_categorical
-from Hat.optimizers import Rmsprop
+from Hat.optimizers import Rmsprop, Adam
+from Hat import serializations
 import Hat.backend as K
 import config as cfg
 import prepareData as ppData
@@ -35,8 +36,9 @@ n_out = len( cfg.labels )
 fold = 0            # can be 0, 1, 2, 3
 
 # prepare data
-tr_X, tr_y = ppData.GetAllData( fe_fd, cfg.tr_csv[fold], agg_num, hop )
-te_X, te_y = ppData.GetAllData( fe_fd, cfg.te_csv[fold], agg_num, hop )
+scaler = ppData.Scaler( fe_fd, cfg.tr_csv[fold] )
+tr_X, tr_y = ppData.GetAllData( fe_fd, cfg.tr_csv[fold], agg_num, hop, scaler )
+te_X, te_y = ppData.GetAllData( fe_fd, cfg.te_csv[fold], agg_num, hop, scaler )
 tr_y = sparse_to_categorical( tr_y, n_out )
 te_y = sparse_to_categorical( te_y, n_out )
 
@@ -44,24 +46,29 @@ te_y = sparse_to_categorical( te_y, n_out )
 print 'tr_X.shape:', tr_X.shape     # (batch_num, n_time, n_freq)
 print 'tr_y.shape:', tr_y.shape     # (batch_num, n_labels )
 
+'''
 # build model
-md = Sequential()
-md.add( InputLayer( (n_time, n_freq) ) )
-md.add( LSTM( n_out=100, act='tanh' ) )       # output size: (batch_num, n_time, n_freq). Try SimpleRnn, GRU instead. 
-md.add( GlobalMeanTimePool( masking=None ) )  # mean along time axis, output shape: (batch_num, n_freq)
-md.add( Dense( n_hid, act='relu' ) )
-md.add( Dropout( 0.1 ) )
-md.add( Dense( n_out, act='softmax' ) )
+seq = Sequential()
+seq.add( InputLayer( (n_time, n_freq) ) )
+seq.add( SimpleRnn( n_out=100, act='tanh' ) )       # output size: (batch_num, n_time, n_freq). Try SimpleRnn, GRU instead. 
+seq.add( GlobalMeanTimePool( masking=None ) )  # mean along time axis, output shape: (batch_num, n_freq)
+seq.add( Flatten() )
+seq.add( Dense( n_hid, act='relu' ) )
+seq.add( Dropout( 0.1 ) )
+seq.add( Dense( n_out, act='softmax' ) )
+md = seq.combine()
 md.summary()
+'''
+md = serializations.load( 'Md/md1.p' )
 
 # callbacks
 # tr_err, te_err are frame based. To get event based err, run recognize.py
 validation = Validation( tr_x=tr_X, tr_y=tr_y, va_x=None, va_y=None, te_x=te_X, te_y=te_y, call_freq=1, dump_path='Results/validation.p' )
-save_model = SaveModel( dump_fd='Md', call_freq=10 )
+save_model = SaveModel( dump_fd='Md', call_freq=1 )
 callbacks = [ validation, save_model ]
 
 # optimizer
-optimizer = Rmsprop(0.001)
+optimizer = Adam(1e-4)
 
 # fit model
 md.fit( x=tr_X, y=tr_y, batch_size=500, n_epoch=100, loss_type='categorical_crossentropy', optimizer=optimizer, callbacks=callbacks )

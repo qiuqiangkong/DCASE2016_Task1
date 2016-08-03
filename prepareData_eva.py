@@ -15,9 +15,7 @@ def CreateFolder( fd ):
 
 if __name__ == "__main__":
     # create folders
-    ppData.CreateFolder('Fe')
     CreateFolder('Results')
-    CreateFolder('Md')
     ppData.CreateFolder('Fe_eva/Mel')
     ppData.CreateFolder('Md_eva')
     
