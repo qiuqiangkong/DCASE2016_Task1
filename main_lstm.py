@@ -1,7 +1,7 @@
 '''
 SUMMARY:  Dcase 2016 Task 1. Scene classification
           Training time: 12 s/epoch. (Tesla M2090)
-          test acc: 70% +- ?, test frame acc: 56% +- ? after 10 epoches on fold 1
+          test acc: 75.2% +- ?, train frame acc: 89.4%, test frame acc: 63.1% +- ? after 10 epoches on fold 1
           Try adjusting hyper-params, optimizer, longer epoches to get better results. 
 AUTHOR:   Qiuqiang Kong
 Created:  2016.05.11
@@ -46,11 +46,11 @@ te_y = sparse_to_categorical( te_y, n_out )
 print 'tr_X.shape:', tr_X.shape     # (batch_num, n_time, n_freq)
 print 'tr_y.shape:', tr_y.shape     # (batch_num, n_labels )
 
-'''
+
 # build model
 seq = Sequential()
 seq.add( InputLayer( (n_time, n_freq) ) )
-seq.add( SimpleRnn( n_out=100, act='tanh' ) )       # output size: (batch_num, n_time, n_freq). Try SimpleRnn, GRU instead. 
+seq.add( LSTM( n_out=100, act='tanh' ) )       # output size: (batch_num, n_time, n_freq). Try SimpleRnn, LSTM, GRU instead. 
 seq.add( GlobalMeanTimePool( masking=None ) )  # mean along time axis, output shape: (batch_num, n_freq)
 seq.add( Flatten() )
 seq.add( Dense( n_hid, act='relu' ) )
@@ -58,8 +58,6 @@ seq.add( Dropout( 0.1 ) )
 seq.add( Dense( n_out, act='softmax' ) )
 md = seq.combine()
 md.summary()
-'''
-md = serializations.load( 'Md/md1.p' )
 
 # callbacks
 # tr_err, te_err are frame based. To get event based err, run recognize.py
@@ -68,7 +66,7 @@ save_model = SaveModel( dump_fd='Md', call_freq=1 )
 callbacks = [ validation, save_model ]
 
 # optimizer
-optimizer = Adam(1e-4)
+optimizer = Adam(1e-3)
 
 # fit model
 md.fit( x=tr_X, y=tr_y, batch_size=500, n_epoch=100, loss_type='categorical_crossentropy', optimizer=optimizer, callbacks=callbacks )
