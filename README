@@ -1,5 +1,6 @@
 2016.06.24
-This is sourcecode of DCASE Challenge 2016 Task 1. http://www.cs.tut.fi/sgn/arg/dcase2016/task-acoustic-scene-classification
+This is sourcecode of DCASE Challenge 2016 Task 1. Paper is here http://www.cs.tut.fi/sgn/arg/dcase2016/documents/challenge_technical_reports/Task1/Kong_2016_task1.pdf
+DCASE Challenge 2016: http://www.cs.tut.fi/sgn/arg/dcase2016/task-acoustic-scene-classification
 Using Mel + DNN achieve 74.8% accuracy on the 0-th fold
 
 THIS CODE IS MIT LISCENCED. 
@@ -22,6 +23,6 @@ Usage:
 * run main_dev_recognize.py 	Generate results and evaluate on cross validation data
 
 ------ Testing of Private Data ------
-1. run prepare_eva_data.py	Calculate features for evaluation data
-2. run main_eva_dnn.py		Train model on all development data
-3. run main_eva_recognize.py	Generate Results of private data. Result is in 'Results/task1_results.txt'
+* run prepare_eva_data.py	Calculate features for evaluation data
+* run main_eva_dnn.py		Train model on all development data
+* run main_eva_recognize.py	Generate Results of private data. Result is in 'Results/task1_results.txt'
