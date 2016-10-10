@@ -4,40 +4,38 @@ Usage:    * fold, fe_fd, agg_num should be same as train procedure
           * model to load should be specified
 AUTHOR:   Qiuqiang Kong
 Created:  2016.05.25
-Modified: -
+Modified: 2016.10.09 Modify varibale names
 --------------------------------------
 '''
-import sys
-sys.path.append('/user/HS229/qk00006/my_code2015.5-/python/Hat')
 import pickle
 import numpy as np
 np.random.seed(1515)
 import scipy.stats
-from Hat.models import Sequential
-from Hat.layers.core import InputLayer, Flatten, Dense, Dropout
-from Hat.callbacks import SaveModel, Validation
-from Hat.preprocessing import sparse_to_categorical, mat_2d_to_3d
-from Hat.optimizers import Rmsprop
-from Hat import serializations
-import Hat.backend as K
+from hat.models import Sequential
+from hat.layers.core import InputLayer, Flatten, Dense, Dropout
+from hat.callbacks import SaveModel, Validation
+from hat.preprocessing import sparse_to_categorical, mat_2d_to_3d
+from hat.optimizers import Rmsprop
+from hat import serializations
+import hat.backend as K
 import config as cfg
-import prepareData as ppData
+import prepare_dev_data as pp_dev_data
 import csv
 import cPickle
 np.set_printoptions(threshold=np.nan, linewidth=1000, precision=2, suppress=True)
 
 # hyper-params
-fe_fd = cfg.fe_mel_fd
-agg_num = 10
-hop = 10
-fold = 0
+fe_fd = cfg.dev_fe_mel_fd
+agg_num = 11    # should be same as training phase
+hop = 5         # should be same as training phase
+fold = 0        # should be same as training phase
 n_labels = len( cfg.labels )
 
 # load model
-md = serializations.load( 'Md/md20.p' )
+md = serializations.load( cfg.dev_md+'/md10.p' )
 
 # get scaler
-scaler = ppData.Scaler( fe_fd, cfg.tr_csv[fold] )
+scaler = pp_dev_data.Scaler( fe_fd, cfg.dev_tr_csv[fold] )
 
 # do recognize and evaluation
 n_labels = len( cfg.labels )
@@ -45,7 +43,7 @@ confM = np.zeros( (n_labels, n_labels) )      # confusion matrix
 acc_frs = []
 
 # get test file names
-with open( cfg.te_csv[fold], 'rb') as f:
+with open( cfg.dev_te_csv[fold], 'rb') as f:
     reader = csv.reader(f)
     lis = list(reader)
     

@@ -1,27 +1,27 @@
 2016.06.24
 This is sourcecode of DCASE Challenge 2016 Task 1. http://www.cs.tut.fi/sgn/arg/dcase2016/task-acoustic-scene-classification
-Using Mel + DNN achieve 77% average accuracy using 4 fold cross validation on development dataset. 
+Using Mel + DNN achieve 74.8% accuracy on the 0-th fold
 
-THIS CODE IS BSD LISCENCED. YOU CAN USE AND MODIFY IT AS YOU WISH. 
+THIS CODE IS MIT LISCENCED. 
 AUTHOR: QIUQIANG KONG, q.kong@surrey.ac.uk
 CVSSP, UNIVERSITY OF SURREY
 
 ======================================
 
-Pre-requiste:
+Pre-requiste python packages:
 librosa
-Hat (https://github.com/qiuqiangkong/Hat)
+hat
 
 Usage:
 ------ Preparation ------
-1. modify the paths of dataset in config.py, modify paths of HAT in every file. 
+* modify the paths of dataset in config.py
 
 ------ Development Cross Validation ------
-1. run prepareData.py 		Calculate features for development data
-2. run main_dnn.py 		Train model on cross validation of development data
-3. run recognize.py 		Generate results and evaluate on cross validation data
+* run prepare_dev_data.py 	Calculate features for development data
+* run main_dev_dnn.py 		Train model on cross validation of development data
+* run main_dev_recognize.py 	Generate results and evaluate on cross validation data
 
------- Generate Results of Private Data ------
-1. run prepareData_eva.py	Calculate features for evaluation data
-2. run main_dnn_eva.py		Train model on all development data
-3. run recognize_eva.py		Generate Results of private data. Result is in 'Results_eva/task4_results.txt'
+------ Testing of Private Data ------
+1. run prepare_eva_data.py	Calculate features for evaluation data
+2. run main_eva_dnn.py		Train model on all development data
+3. run main_eva_recognize.py	Generate Results of private data. Result is in 'Results/task1_results.txt'

@@ -2,11 +2,9 @@
 SUMMARY:  prepareData, some functions copy from py_sceneClassification2
 AUTHOR:   Qiuqiang Kong
 Created:  2016.05.11
-Modified: -
+Modified: 2016.10.09 modify variable name
 --------------------------------------
 '''
-import sys
-sys.path.append('/user/HS229/qk00006/my_code2015.5-/python/Hat')
 import numpy as np
 from scipy import signal
 import cPickle
@@ -17,7 +15,7 @@ import librosa
 import config as cfg
 import csv
 import wavio
-from Hat.preprocessing import mat_2d_to_3d
+from hat.preprocessing import mat_2d_to_3d
 
 ### readwav
 def readwav( path ):
@@ -123,10 +121,8 @@ def CreateFolder( fd ):
         os.makedirs(fd)
         
 if __name__ == "__main__":
-    CreateFolder('Fe')
-    CreateFolder('Fe/Mel')
-    CreateFolder('Results')
-    CreateFolder('Md')
+    CreateFolder( cfg.dev_fe_fd )
+    CreateFolder( cfg.dev_fe_mel_fd )
     
     # calculate mel feature
-    GetMel( cfg.wav_fd, cfg.fe_mel_fd, n_delete=0 )
+    GetMel( cfg.dev_wav_fd, cfg.dev_fe_mel_fd, n_delete=0 )

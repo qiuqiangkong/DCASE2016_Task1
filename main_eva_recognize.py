@@ -1,42 +1,42 @@
 '''
 SUMMARY:  Do classification on private dataset and write out result. 
-          Training time: 9 s/epoch. (Tesla M2090)
+          Training time: 25 s/epoch. (GTX TitanX)
 AUTHOR:   Qiuqiang Kong
 Created:  2016.06.24
+Modified: 2016.10.09 Modify variable names
 --------------------------------------
 '''
-import sys
-sys.path.append('/user/HS229/qk00006/my_code2015.5-/python/Hat')
 import pickle
 import numpy as np
 np.random.seed(1515)
 import scipy.stats
-from Hat.models import Sequential
-from Hat.layers.core import InputLayer, Flatten, Dense, Dropout
-from Hat.callbacks import SaveModel, Validation
-from Hat.preprocessing import sparse_to_categorical, mat_2d_to_3d
-from Hat import serializations
-from Hat.optimizers import Rmsprop
-import Hat.backend as K
+from hat.models import Sequential
+from hat.layers.core import InputLayer, Flatten, Dense, Dropout
+from hat.callbacks import SaveModel, Validation
+from hat.preprocessing import sparse_to_categorical, mat_2d_to_3d
+from hat import serializations
+from hat.optimizers import Rmsprop
+import hat.backend as K
 import config as cfg
-import prepareData as ppData
+import prepare_dev_data as pp_dev_data
 import csv
+import os
 import cPickle
 
 # hyper-params
-fe_fd = cfg.fe_mel_eva_fd
-agg_num = 10    # this should be same as training procedure
-hop = 10
+fe_fd = cfg.eva_fe_mel_fd
+agg_num = 11    # this should be same as training procedure
+hop = 5
 n_labels = len( cfg.labels )
 
 # load model
-md = serializations.load( 'Md_eva/md20.p' )
+md = serializations.load( cfg.eva_md+'/md10.p' )
 
 # get scaler
-scaler = ppData.Scaler( fe_fd, cfg.txt_eva_path )
+scaler = pp_dev_data.Scaler( fe_fd, cfg.eva_txt_path )
 
 # load name of wavs to be classified
-with open( cfg.txt_eva_path, 'rb') as f:
+with open( cfg.eva_txt_path, 'rb') as f:
     reader = csv.reader(f)
     lis = list(reader)
 
@@ -47,7 +47,7 @@ pred_lbs = []
 for li in lis:
     names.append( li[0] )
     na = li[0][6:-4]
-    fe_path = cfg.fe_mel_eva_fd + '/' + na + '.f'
+    fe_path = cfg.eva_fe_mel_fd + '/' + na + '.f'
     X = cPickle.load( open( fe_path, 'rb' ) )
     X = scaler.transform( X )
     X = mat_2d_to_3d( X, agg_num, hop )
@@ -60,7 +60,8 @@ for li in lis:
     pred_lbs.append( cfg.id_to_lb[ pred ] )
     
 # write out result
-f = open('Results/task1_results.txt', 'w')
+if not os.path.exists( cfg.scrap_fd+'/Results' ): os.makedirs( cfg.scrap_fd+'/Results' )
+f = open(cfg.scrap_fd+'/Results/task1_results.txt', 'w')
 for i1 in xrange( len( names ) ):
     f.write( names[i1] + '\t' + pred_lbs[i1] + '\n' )
 f.close()
