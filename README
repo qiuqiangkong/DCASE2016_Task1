@@ -10,8 +10,8 @@ CVSSP, UNIVERSITY OF SURREY
 ======================================
 
 Pre-requiste python packages:
-librosa
-hat
+pip install librosa
+pip install hat		Deep learning toolbox, https://qiuqiangkong.github.io/Hat
 
 Usage:
 ------ Preparation ------
