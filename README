@@ -1,0 +1,26 @@
+This is sourcecode of DCASE Challenge 2016 Task 1 of paper
+http://www.cs.tut.fi/sgn/arg/dcase2016/documents/challenge_technical_reports/Task1/Kong_2016_task1.pdf
+[Ref] http://www.cs.tut.fi/sgn/arg/dcase2016/task-acoustic-scene-classification
+
+THIS CODE IS MIT LISCENCED. 
+AUTHOR: QIUQIANG KONG, q.kong@surrey.ac.uk
+CVSSP, UNIVERSITY OF SURREY
+Created: 2016.06.24
+Latest modified: 2017.04.28
+======================================
+
+Pre-requiste python packages:
+pip install hat [--upgrade]		Deep learning toolbox, https://qiuqiangkong.github.io/Hat
+
+Usage:
+------ Preparation ------
+* modify the paths of dataset in config.py
+* python prepare_data.py --calculate_logmel 	# Calculate features
+
+------ Development Cross Validation ------
+* python main_dev_dnn.py --train		# Train model on cross validation of development data. 
+* python main_dev_dnn.py --recognize		# Get predictions and print out statistics. 
+
+------ Testing of Private Data ------
+* python main_eva_dnn.py --train		# Train model on whole development data
+* python main_eva_dnn.py --recognize		# Get predictions of private data and print out statistics. 
